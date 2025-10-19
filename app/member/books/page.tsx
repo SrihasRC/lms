@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select'
 import { BookCard } from '@/components/book-card'
 import { getAllBooks } from '@/lib/actions/books'
-import { borrowBook } from '@/lib/actions/transactions'
+import { createBorrowRequest } from '@/lib/actions/borrow-requests'
 import { createReservation } from '@/lib/actions/reservations'
 import { getGenres } from '@/lib/actions/books'
 import { toast } from 'sonner'
@@ -79,14 +79,14 @@ export default function MemberBooksPage() {
     
     try {
       if (book.available_copies > 0) {
-        // Book is available - borrow it
-        const result = await borrowBook(book.id)
+        // Book is available - create borrow request
+        const result = await createBorrowRequest(book.id)
         if (result.success) {
           toast.success(result.message)
           // Refresh books list
           loadData()
         } else {
-          toast.error(result.error || 'Failed to borrow book')
+          toast.error(result.error || 'Failed to create borrow request')
         }
       } else {
         // Book is unavailable - create reservation
@@ -110,7 +110,7 @@ export default function MemberBooksPage() {
       <div>
         <h1 className="text-3xl font-bold">Browse Books</h1>
         <p className="text-muted-foreground">
-          Borrow available books or reserve unavailable ones from our collection of {books.length} books
+          Request to borrow available books or reserve unavailable ones from our collection of {books.length} books
         </p>
       </div>
 
@@ -191,10 +191,10 @@ export default function MemberBooksPage() {
               actionLabel={
                 reserving === book.id
                   ? book.available_copies > 0
-                    ? 'Borrowing...'
+                    ? 'Requesting...'
                     : 'Reserving...'
                   : book.available_copies > 0
-                  ? 'Borrow'
+                  ? 'Request'
                   : 'Reserve'
               }
               onAction={() => handleBookAction(book)}

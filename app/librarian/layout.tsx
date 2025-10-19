@@ -10,6 +10,11 @@ const sidebarItems: SidebarItem[] = [
     icon: 'LayoutDashboard',
   },
   {
+    title: 'Borrow Requests',
+    href: '/librarian/requests',
+    icon: 'FileCheck',
+  },
+  {
     title: 'Issue Book',
     href: '/librarian/issue',
     icon: 'BookPlus',

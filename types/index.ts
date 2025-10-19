@@ -6,6 +6,8 @@ export type TransactionStatus = 'issued' | 'returned' | 'overdue';
 
 export type ReservationStatus = 'pending' | 'fulfilled' | 'cancelled' | 'expired';
 
+export type BorrowRequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
+
 export interface Profile {
   id: string;
   email: string;
@@ -87,6 +89,25 @@ export interface Fine {
   // Joined data
   transaction?: Transaction;
   user?: Profile;
+}
+
+export interface BorrowRequest {
+  id: string;
+  book_id: string;
+  user_id: string;
+  request_date: string;
+  requested_due_date: string;
+  status: BorrowRequestStatus;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  rejection_reason?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  // Joined data
+  book?: Book;
+  user?: Profile;
+  reviewed_by_profile?: Profile;
 }
 
 // Form Types

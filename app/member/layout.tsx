@@ -15,6 +15,11 @@ const sidebarItems: SidebarItem[] = [
     icon: 'Library',
   },
   {
+    title: 'My Requests',
+    href: '/member/requests',
+    icon: 'FileCheck',
+  },
+  {
     title: 'My Books',
     href: '/member/my-books',
     icon: 'BookOpen',
