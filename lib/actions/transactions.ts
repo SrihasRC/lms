@@ -243,3 +243,79 @@ export async function updateOverdueStatus() {
   
   return { success: true }
 }
+
+export async function borrowBook(bookId: string) {
+  const supabase = await createClient()
+
+  // Get current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  
+  if (authError || !user) {
+    return { success: false, error: 'Authentication required' }
+  }
+
+  // Check if book is available
+  const { data: book, error: bookError } = await supabase
+    .from('books')
+    .select('available_copies, title')
+    .eq('id', bookId)
+    .single()
+
+  if (bookError || !book) {
+    return { success: false, error: 'Book not found' }
+  }
+
+  if (book.available_copies <= 0) {
+    return { success: false, error: 'Book is not available' }
+  }
+
+  // Check if user already has this book issued
+  const { data: existingTransaction } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('book_id', bookId)
+    .eq('user_id', user.id)
+    .eq('status', 'issued')
+    .single()
+
+  if (existingTransaction) {
+    return { success: false, error: 'You already have this book borrowed' }
+  }
+
+  const dueDate = calculateDueDate()
+
+  // Create transaction
+  const { error: transactionError } = await supabase
+    .from('transactions')
+    .insert([{
+      book_id: bookId,
+      user_id: user.id,
+      issued_by: user.id, // Self-issue
+      due_date: dueDate,
+      status: 'issued',
+      notes: 'Self-borrowed online',
+    }])
+
+  if (transactionError) {
+    return { success: false, error: transactionError.message }
+  }
+
+  // Update book available copies
+  const { error: updateError } = await supabase
+    .from('books')
+    .update({ available_copies: book.available_copies - 1 })
+    .eq('id', bookId)
+
+  if (updateError) {
+    return { success: false, error: updateError.message }
+  }
+
+  revalidatePath('/member/books')
+  revalidatePath('/member/my-books')
+  revalidatePath('/member')
+  
+  return { 
+    success: true, 
+    message: `Successfully borrowed "${book.title}". Due date: ${new Date(dueDate).toLocaleDateString()}` 
+  }
+}

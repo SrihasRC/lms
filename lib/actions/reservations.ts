@@ -5,8 +5,17 @@ import { createClient } from '@/lib/supabase/server'
 import type { Reservation } from '@/types'
 import { RESERVATION_EXPIRY_DAYS } from '@/lib/constants'
 
-export async function createReservation(bookId: string, userId: string) {
+export async function createReservation(bookId: string, userId?: string) {
   const supabase = await createClient()
+
+  // Get current user if userId not provided
+  if (!userId) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return { success: false, error: 'Authentication required' }
+    }
+    userId = user.id
+  }
 
   // Check if book is available
   const { data: book } = await supabase

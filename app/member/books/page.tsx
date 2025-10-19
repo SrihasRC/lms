@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { BookCard } from '@/components/book-card'
 import { getAllBooks } from '@/lib/actions/books'
+import { borrowBook } from '@/lib/actions/transactions'
 import { createReservation } from '@/lib/actions/reservations'
 import { getGenres } from '@/lib/actions/books'
 import { toast } from 'sonner'
@@ -73,26 +74,31 @@ export default function MemberBooksPage() {
     setLoading(false)
   }
 
-  const handleReserve = async (book: Book) => {
-    if (book.available_copies > 0) {
-      toast.info('This book is available. Please ask a librarian to issue it directly.')
-      return
-    }
-
+  const handleBookAction = async (book: Book) => {
     setReserving(book.id)
+    
     try {
-      // Get current user ID from session
-      const response = await fetch('/api/user')
-      const { userId } = await response.json()
-
-      const result = await createReservation(book.id, userId)
-      if (result.success) {
-        toast.success(result.message)
+      if (book.available_copies > 0) {
+        // Book is available - borrow it
+        const result = await borrowBook(book.id)
+        if (result.success) {
+          toast.success(result.message)
+          // Refresh books list
+          loadData()
+        } else {
+          toast.error(result.error || 'Failed to borrow book')
+        }
       } else {
-        toast.error(result.error || 'Failed to reserve book')
+        // Book is unavailable - create reservation
+        const result = await createReservation(book.id)
+        if (result.success) {
+          toast.success(result.message)
+        } else {
+          toast.error(result.error || 'Failed to reserve book')
+        }
       }
     } catch (error) {
-      toast.error('Error reserving book')
+      toast.error('An error occurred')
       console.error(error)
     } finally {
       setReserving(null)
@@ -104,7 +110,7 @@ export default function MemberBooksPage() {
       <div>
         <h1 className="text-3xl font-bold">Browse Books</h1>
         <p className="text-muted-foreground">
-          Discover and reserve from our collection of {books.length} books
+          Borrow available books or reserve unavailable ones from our collection of {books.length} books
         </p>
       </div>
 
@@ -183,13 +189,15 @@ export default function MemberBooksPage() {
               key={book.id}
               book={book}
               actionLabel={
-                book.available_copies > 0
-                  ? 'Available'
-                  : reserving === book.id
-                  ? 'Reserving...'
+                reserving === book.id
+                  ? book.available_copies > 0
+                    ? 'Borrowing...'
+                    : 'Reserving...'
+                  : book.available_copies > 0
+                  ? 'Borrow'
                   : 'Reserve'
               }
-              onAction={book.available_copies === 0 ? () => handleReserve(book) : undefined}
+              onAction={() => handleBookAction(book)}
             />
           ))}
         </div>
