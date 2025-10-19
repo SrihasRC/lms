@@ -22,7 +22,7 @@ export function Sidebar({ items }: SidebarProps) {
     <aside className="w-64 border-r bg-card h-[calc(100vh-4rem)] sticky top-16">
       <nav className="flex flex-col gap-1 p-4">
         {items.map((item) => {
-          const Icon = (Icons as any)[item.icon] || Icons.Circle
+          const IconComponent = Icons[item.icon as keyof typeof Icons] as React.ComponentType<{ className?: string }> || Icons.Circle
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
           
           return (
@@ -36,7 +36,7 @@ export function Sidebar({ items }: SidebarProps) {
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               )}
             >
-              <Icon className="h-4 w-4" />
+              <IconComponent className="h-4 w-4" />
               {item.title}
             </Link>
           )
