@@ -23,7 +23,9 @@ export function Sidebar({ items }: SidebarProps) {
       <nav className="flex flex-col gap-1 p-4">
         {items.map((item) => {
           const IconComponent = Icons[item.icon as keyof typeof Icons] as React.ComponentType<{ className?: string }> || Icons.Circle
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+          // Exact match for dashboard pages, or startsWith for sub-pages
+          const isActive = pathname === item.href || 
+            (item.href !== '/admin' && item.href !== '/librarian' && item.href !== '/member' && pathname.startsWith(item.href + '/'))
           
           return (
             <Link
