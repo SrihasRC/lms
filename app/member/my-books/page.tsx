@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react'
 import { Loader2, BookOpen, AlertCircle, Calendar, ArrowLeftRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { getActiveTransactions, memberReturnBook } from '@/lib/actions/transactions'
 import { formatDate, formatCurrency, isOverdue, calculateFine } from '@/lib/helpers'
 import { toast } from 'sonner'
@@ -13,6 +21,11 @@ export default function MyBooksPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [returning, setReturning] = useState<string | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; transactionId: string; bookTitle: string }>({
+    open: false,
+    transactionId: '',
+    bookTitle: '',
+  })
 
   useEffect(() => {
     loadTransactions()
@@ -25,10 +38,13 @@ export default function MyBooksPage() {
     setLoading(false)
   }
 
-  const handleReturn = async (transactionId: string, bookTitle: string) => {
-    if (!confirm(`Are you sure you want to return "${bookTitle}"?`)) {
-      return
-    }
+  const handleReturnClick = (transactionId: string, bookTitle: string) => {
+    setConfirmDialog({ open: true, transactionId, bookTitle })
+  }
+
+  const handleConfirmReturn = async () => {
+    const { transactionId } = confirmDialog
+    setConfirmDialog({ open: false, transactionId: '', bookTitle: '' })
 
     setReturning(transactionId)
     try {
@@ -175,7 +191,7 @@ export default function MyBooksPage() {
                     <Button
                       size="sm"
                       variant={overdue ? 'destructive' : 'default'}
-                      onClick={() => handleReturn(transaction.id, transaction.book?.title || 'Book')}
+                      onClick={() => handleReturnClick(transaction.id, transaction.book?.title || 'Book')}
                       disabled={returning === transaction.id}
                       className="mt-2"
                     >
@@ -227,6 +243,29 @@ export default function MyBooksPage() {
           </div>
         </div>
       )}
+
+      {/* Confirm Return Dialog */}
+      <Dialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Return Book</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to return &quot;{confirmDialog.bookTitle}&quot;?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog({ open: false, transactionId: '', bookTitle: '' })}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmReturn}>
+              Confirm Return
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

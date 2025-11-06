@@ -43,12 +43,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full relative bg-black">
-      {/* Violet Storm Background with Top Glow */}
+    <div className="min-h-screen w-full relative bg-background">
+      {/* Subtle gradient background matching app theme */}
       <div
         className="absolute inset-0 z-0"
         style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139, 92, 246, 0.25), transparent 70%), #000000",
+          background: "radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--primary) / 0.1), transparent 70%)",
         }}
       />
 
@@ -58,33 +58,33 @@ export default function LoginPage() {
           {/* Library Logo & Title */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/50">
-                <BookOpen className="h-9 w-9 text-white" />
+              <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+                <BookOpen className="h-9 w-9 text-primary-foreground" />
               </div>
             </div>
-            <h1 className="text-4xl font-bold text-white mb-2">Library Portal</h1>
-            <p className="text-gray-400">Access your digital library</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Library Portal</h1>
+            <p className="text-muted-foreground">Access your digital library</p>
           </div>
 
           {/* Login Card */}
-          <Card className="border-gray-800 bg-gray-950/50 backdrop-blur-sm">
+          <Card className="border shadow-lg">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-white">Welcome Back</CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardTitle className="text-2xl">Welcome Back</CardTitle>
+              <CardDescription>
                 Sign in to your library account
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-200">Email</Label>
+                  <Label htmlFor="email">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="your@email.com"
-                      className="pl-10 bg-gray-900 border-gray-800 text-white placeholder:text-gray-500"
+                      className="pl-10"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
@@ -93,14 +93,14 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-200">Password</Label>
+                  <Label htmlFor="password">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="password"
                       type="password"
                       placeholder="Enter your password"
-                      className="pl-10 bg-gray-900 border-gray-800 text-white placeholder:text-gray-500"
+                      className="pl-10"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       required
@@ -110,7 +110,7 @@ export default function LoginPage() {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/30" 
+                  className="w-full" 
                   disabled={loading}
                 >
                   {loading ? (
@@ -125,8 +125,8 @@ export default function LoginPage() {
               </form>
 
               <div className="mt-6 text-center text-sm">
-                <span className="text-gray-400">Don&apos;t have an account? </span>
-                <Link href="/register" className="text-violet-400 hover:text-violet-300 font-medium">
+                <span className="text-muted-foreground">Don&apos;t have an account? </span>
+                <Link href="/register" className="text-primary hover:underline font-medium">
                   Register
                 </Link>
               </div>
