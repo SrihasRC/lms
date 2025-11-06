@@ -1,15 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, BookOpen, AlertCircle, Calendar } from 'lucide-react'
+import { Loader2, BookOpen, AlertCircle, Calendar, ArrowLeftRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { getActiveTransactions } from '@/lib/actions/transactions'
+import { Button } from '@/components/ui/button'
+import { getActiveTransactions, memberReturnBook } from '@/lib/actions/transactions'
 import { formatDate, formatCurrency, isOverdue, calculateFine } from '@/lib/helpers'
+import { toast } from 'sonner'
 import type { Transaction } from '@/types'
 
 export default function MyBooksPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [returning, setReturning] = useState<string | null>(null)
 
   useEffect(() => {
     loadTransactions()
@@ -20,6 +23,28 @@ export default function MyBooksPage() {
     const result = await getActiveTransactions()
     setTransactions(result)
     setLoading(false)
+  }
+
+  const handleReturn = async (transactionId: string, bookTitle: string) => {
+    if (!confirm(`Are you sure you want to return "${bookTitle}"?`)) {
+      return
+    }
+
+    setReturning(transactionId)
+    try {
+      const result = await memberReturnBook(transactionId)
+      if (result.success) {
+        toast.success(result.message)
+        loadTransactions() // Reload the list
+      } else {
+        toast.error(result.error || 'Failed to return book')
+      }
+    } catch (error) {
+      toast.error('An error occurred')
+      console.error(error)
+    } finally {
+      setReturning(null)
+    }
   }
 
   const overdueBooks = transactions.filter(t => isOverdue(t.due_date))
@@ -145,13 +170,34 @@ export default function MyBooksPage() {
                         <p className="text-sm text-muted-foreground">Due soon</p>
                       </div>
                     )}
+                    
+                    {/* Return Button */}
+                    <Button
+                      size="sm"
+                      variant={overdue ? 'destructive' : 'default'}
+                      onClick={() => handleReturn(transaction.id, transaction.book?.title || 'Book')}
+                      disabled={returning === transaction.id}
+                      className="mt-2"
+                    >
+                      {returning === transaction.id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Returning...
+                        </>
+                      ) : (
+                        <>
+                          <ArrowLeftRight className="h-4 w-4 mr-2" />
+                          Return Book
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
 
                 {overdue && (
                   <div className="mt-4 pt-4 border-t text-sm text-destructive">
                     <AlertCircle className="inline h-4 w-4 mr-1" />
-                    Please return this book to avoid additional fines
+                    Please return this book to avoid additional fines. Current fine: {formatCurrency(fineAmount)}
                   </div>
                 )}
               </div>

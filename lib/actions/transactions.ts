@@ -319,3 +319,82 @@ export async function borrowBook(bookId: string) {
     message: `Successfully borrowed "${book.title}". Due date: ${new Date(dueDate).toLocaleDateString()}` 
   }
 }
+
+export async function memberReturnBook(transactionId: string) {
+  const supabase = await createClient()
+
+  // Get current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  
+  if (authError || !user) {
+    return { success: false, error: 'Authentication required' }
+  }
+
+  // Get transaction details and verify it belongs to the user
+  const { data: transaction, error: fetchError } = await supabase
+    .from('transactions')
+    .select('*, books(*)')
+    .eq('id', transactionId)
+    .eq('user_id', user.id)
+    .eq('status', 'issued')
+    .single()
+
+  if (fetchError || !transaction) {
+    return { success: false, error: 'Transaction not found or already returned' }
+  }
+
+  const returnDate = new Date().toISOString()
+  const fineAmount = calculateFine(transaction.due_date, returnDate)
+  const status = isOverdue(transaction.due_date) ? 'overdue' : 'returned'
+
+  // Update transaction
+  const { error: updateError } = await supabase
+    .from('transactions')
+    .update({
+      return_date: returnDate,
+      returned_by: user.id, // Member returns it themselves
+      status: status,
+      fine_amount: fineAmount,
+    })
+    .eq('id', transactionId)
+
+  if (updateError) {
+    return { success: false, error: updateError.message }
+  }
+
+  // Update book available copies
+  const { error: bookError } = await supabase
+    .from('books')
+    .update({ available_copies: transaction.books.available_copies + 1 })
+    .eq('id', transaction.book_id)
+
+  if (bookError) {
+    return { success: false, error: bookError.message }
+  }
+
+  // Create fine record if applicable
+  if (fineAmount > 0) {
+    await supabase
+      .from('fines')
+      .insert([{
+        transaction_id: transactionId,
+        user_id: user.id,
+        amount: fineAmount,
+        reason: `Overdue fine for "${transaction.books.title}"`,
+      }])
+  }
+
+  revalidatePath('/member/my-books')
+  revalidatePath('/member/history')
+  revalidatePath('/member/fines')
+  revalidatePath('/member')
+  
+  return { 
+    success: true, 
+    fineAmount,
+    message: fineAmount > 0 
+      ? `Book returned. You have a fine of ₹${fineAmount} for late return.` 
+      : 'Book returned successfully!' 
+  }
+}
+
