@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, Calendar, User, IndianRupee } from 'lucide-react'
+import { Loader2, Calendar, User, IndianRupee, RefreshCw } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -11,7 +11,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { getAllFines } from '@/lib/actions/fines'
+import { Button } from '@/components/ui/button'
+import { getAllFines, syncOverdueFines } from '@/lib/actions/fines'
 import { formatDate, formatCurrency } from '@/lib/helpers'
 import type { Fine } from '@/types'
 
@@ -25,6 +26,8 @@ export default function AdminFinesPage() {
 
   const loadFines = async () => {
     setLoading(true)
+    // Sync overdue fines first
+    await syncOverdueFines()
     const result = await getAllFines()
     setFines(result)
     setLoading(false)
@@ -36,9 +39,19 @@ export default function AdminFinesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Fines</h1>
-        <p className="text-muted-foreground">View and manage all fines</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Fines</h1>
+          <p className="text-muted-foreground">View and manage all fines</p>
+        </div>
+        <Button onClick={loadFines} variant="outline" disabled={loading}>
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Refresh
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

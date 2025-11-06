@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, DollarSign, AlertCircle, CheckCircle } from 'lucide-react'
+import { Loader2, DollarSign, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { getUserFines, payFine } from '@/lib/actions/fines'
+import { getUserFines, payFine, syncOverdueFines } from '@/lib/actions/fines'
 import { formatDate, formatCurrency } from '@/lib/helpers'
 import { toast } from 'sonner'
 import type { Fine } from '@/types'
@@ -28,7 +28,9 @@ export default function FinesPage() {
 
   const loadFines = async () => {
     setLoading(true)
-    const result = await getUserFines('current-user-id')
+    // Sync overdue fines first
+    await syncOverdueFines()
+    const result = await getUserFines()
     setFines(result)
     setLoading(false)
   }
@@ -58,12 +60,22 @@ export default function FinesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <DollarSign className="h-8 w-8" />
-          My Fines
-        </h1>
-        <p className="text-muted-foreground">Track and pay your library fines</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <DollarSign className="h-8 w-8" />
+            My Fines
+          </h1>
+          <p className="text-muted-foreground">Track and pay your library fines</p>
+        </div>
+        <Button onClick={loadFines} variant="outline" disabled={loading}>
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Refresh
+        </Button>
       </div>
 
       {/* Summary Cards */}
