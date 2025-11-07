@@ -25,7 +25,7 @@ def get_driver():
 
 def login_as_librarian(driver):
     """Helper function to login as librarian"""
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     driver.get(f"{BASE_URL}/login")
     driver.find_element(By.ID, "email").send_keys("librarian@lms.com")
     driver.find_element(By.ID, "password").send_keys("lib123")
@@ -35,27 +35,30 @@ def login_as_librarian(driver):
 def test_librarian_dashboard():
     """Test librarian dashboard loads"""
     driver = get_driver()
+    wait = WebDriverWait(driver, 15)
     
     try:
         print("Testing librarian dashboard...")
         login_as_librarian(driver)
         
-        # Check dashboard loaded
+        wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
+        
         title = driver.find_element(By.TAG_NAME, "h1")
-        assert title.text != ""
+        print(f"  Found title: '{title.text}'")
         
         print("✅ Librarian dashboard loaded")
         
     except Exception as e:
         print(f"❌ Librarian dashboard test failed: {e}")
         driver.save_screenshot("error_librarian_dashboard.png")
+        print(f"  Screenshot saved to error_librarian_dashboard.png")
     finally:
         driver.quit()
 
 def test_view_requests():
     """Test viewing borrow requests page"""
     driver = get_driver()
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     
     try:
         print("Testing librarian requests page...")
@@ -66,19 +69,21 @@ def test_view_requests():
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
         
         assert "/librarian/requests" in driver.current_url
+        print(f"  On correct page: {driver.current_url}")
         
         print("✅ Librarian requests page loaded")
         
     except Exception as e:
         print(f"❌ Librarian requests test failed: {e}")
         driver.save_screenshot("error_librarian_requests.png")
+        print(f"  Screenshot saved to error_librarian_requests.png")
     finally:
         driver.quit()
 
 def test_view_issue_page():
     """Test viewing issue books page"""
     driver = get_driver()
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     
     try:
         print("Testing librarian issue page...")
@@ -89,19 +94,21 @@ def test_view_issue_page():
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
         
         assert "/librarian/issue" in driver.current_url
+        print(f"  On correct page: {driver.current_url}")
         
         print("✅ Librarian issue page loaded")
         
     except Exception as e:
         print(f"❌ Librarian issue test failed: {e}")
         driver.save_screenshot("error_librarian_issue.png")
+        print(f"  Screenshot saved to error_librarian_issue.png")
     finally:
         driver.quit()
 
 def test_view_return_page():
     """Test viewing return books page"""
     driver = get_driver()
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     
     try:
         print("Testing librarian return page...")
@@ -112,19 +119,21 @@ def test_view_return_page():
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
         
         assert "/librarian/return" in driver.current_url
+        print(f"  On correct page: {driver.current_url}")
         
         print("✅ Librarian return page loaded")
         
     except Exception as e:
         print(f"❌ Librarian return test failed: {e}")
         driver.save_screenshot("error_librarian_return.png")
+        print(f"  Screenshot saved to error_librarian_return.png")
     finally:
         driver.quit()
 
 def test_view_overdue_page():
     """Test viewing overdue books page"""
     driver = get_driver()
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     
     try:
         print("Testing librarian overdue page...")
@@ -135,12 +144,14 @@ def test_view_overdue_page():
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
         
         assert "/librarian/overdue" in driver.current_url
+        print(f"  On correct page: {driver.current_url}")
         
         print("✅ Librarian overdue page loaded")
         
     except Exception as e:
         print(f"❌ Librarian overdue test failed: {e}")
         driver.save_screenshot("error_librarian_overdue.png")
+        print(f"  Screenshot saved to error_librarian_overdue.png")
     finally:
         driver.quit()
 

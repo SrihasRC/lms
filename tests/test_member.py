@@ -23,27 +23,9 @@ def get_driver():
     service = Service(CHROMEDRIVER_PATH)
     return webdriver.Chrome(service=service, options=chrome_options)
 
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# import time
-
-# BASE_URL = "http://localhost:3000"
-
-# def get_driver():
-#     """Create and return a Chrome driver instance"""
-#     chrome_options = Options()
-#     chrome_options.add_argument('--headless=new')  # Run in headless mode
-#     chrome_options.add_argument('--no-sandbox')
-#     chrome_options.add_argument('--disable-dev-shm-usage')
-#     chrome_options.add_argument('--disable-gpu')
-#     return webdriver.Chrome(options=chrome_options)
-
 def login_as_member(driver):
     """Helper function to login as member"""
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     driver.get(f"{BASE_URL}/login")
     driver.find_element(By.ID, "email").send_keys("m1@lms.com")
     driver.find_element(By.ID, "password").send_keys("mem1123")

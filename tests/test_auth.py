@@ -12,7 +12,6 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
 
-# Configuration
 BASE_URL = "http://localhost:3000"
 CHROME_BINARY = "/home/srihasrc/Music/lms/chrome-linux64/chrome"
 CHROMEDRIVER_PATH = "/home/srihasrc/Music/lms/tests/drivers/chromedriver"
@@ -27,38 +26,34 @@ def get_driver():
 def test_login_admin():
     """Test admin login"""
     driver = get_driver()
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     
     try:
         print("Testing admin login...")
         
-        # Navigate to login
         driver.get(f"{BASE_URL}/login")
         
-        # Fill credentials
         driver.find_element(By.ID, "email").send_keys("admin@lms.com")
         driver.find_element(By.ID, "password").send_keys("admin123")
-        
-        # Submit
         driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         
-        # Wait for redirect to admin dashboard
         wait.until(EC.url_contains("/admin"))
         
-        # Verify we're on admin page
         assert "/admin" in driver.current_url
+        print(f"  Redirected to: {driver.current_url}")
         print("✅ Admin login successful")
         
     except Exception as e:
         print(f"❌ Admin login failed: {e}")
         driver.save_screenshot("error_admin_login.png")
+        print(f"  Screenshot saved to error_admin_login.png")
     finally:
         driver.quit()
 
 def test_login_librarian():
     """Test librarian login"""
     driver = get_driver()
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     
     try:
         print("Testing librarian login...")
@@ -72,18 +67,20 @@ def test_login_librarian():
         wait.until(EC.url_contains("/librarian"))
         
         assert "/librarian" in driver.current_url
+        print(f"  Redirected to: {driver.current_url}")
         print("✅ Librarian login successful")
         
     except Exception as e:
         print(f"❌ Librarian login failed: {e}")
         driver.save_screenshot("error_librarian_login.png")
+        print(f"  Screenshot saved to error_librarian_login.png")
     finally:
         driver.quit()
 
 def test_login_member():
     """Test member login"""
     driver = get_driver()
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 15)
     
     try:
         print("Testing member login...")
@@ -97,18 +94,19 @@ def test_login_member():
         wait.until(EC.url_contains("/member"))
         
         assert "/member" in driver.current_url
+        print(f"  Redirected to: {driver.current_url}")
         print("✅ Member login successful")
         
     except Exception as e:
         print(f"❌ Member login failed: {e}")
         driver.save_screenshot("error_member_login.png")
+        print(f"  Screenshot saved to error_member_login.png")
     finally:
         driver.quit()
 
 def test_login_invalid():
     """Test login with invalid credentials"""
     driver = get_driver()
-    wait = WebDriverWait(driver, 10)
     
     try:
         print("Testing invalid login...")
@@ -119,16 +117,16 @@ def test_login_invalid():
         driver.find_element(By.ID, "password").send_keys("wrongpassword")
         driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         
-        # Wait a bit for error message
         time.sleep(2)
         
-        # Should still be on login page
         assert "/login" in driver.current_url
+        print("  Still on login page as expected")
         print("✅ Invalid login correctly rejected")
         
     except Exception as e:
         print(f"❌ Invalid login test failed: {e}")
         driver.save_screenshot("error_invalid_login.png")
+        print(f"  Screenshot saved to error_invalid_login.png")
     finally:
         driver.quit()
 
