@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Disable font optimization for Turbopack build
+  optimizeFonts: false,
 };
 
 export default nextConfig;
