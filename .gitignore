@@ -43,3 +43,6 @@ next-env.d.ts
 *.sql
 
 chrome-linux64/
+
+tests/drivers/
+tests/__pycache__/
